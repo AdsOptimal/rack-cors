@@ -346,7 +346,8 @@ module Rack
             'Access-Control-Allow-Methods'    => methods.collect{|m| m.to_s.upcase}.join(', '),
             'Access-Control-Expose-Headers'   => expose.nil? ? '' : expose.join(', '),
             'Access-Control-Max-Age'          => max_age.to_s }
-          #h['Access-Control-Allow-Credentials'] = 'true' if credentials
+          #['Access-Control-Allow-Credentials'] = 'true' if credentials
+          ['Access-Control-Allow-Credentials'] = 'false'
           h
         end
 
