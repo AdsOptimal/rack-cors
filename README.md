@@ -19,34 +19,7 @@ gem 'rack-cors', :require => 'rack/cors'
 
 ## Configuration
 
-### Rack
-
-In `config.ru`, configure `Rack::Cors` by passing a block to the `use` command:
-
-```ruby
-use Rack::Cors do
-  allow do
-    origins 'localhost:3000', '127.0.0.1:3000',
-            /\Ahttp:\/\/192\.168\.0\.\d{1,3}(:\d+)?\z/
-            # regular expressions can be used here
-
-    resource '/file/list_all/', :headers => 'x-domain-token'
-    resource '/file/at/*',
-        :methods => [:get, :post, :delete, :put, :patch, :options, :head],
-        :headers => 'x-domain-token',
-        :expose  => ['Some-Custom-Response-Header'],
-        :max_age => 600
-        # headers to expose
-  end
-
-  allow do
-    origins '*'
-    resource '/public/*', :headers => :any, :methods => :get
-  end
-end
-```
-
-### Rails
+### Rails Configuration
 Put something like the code below in `config/application.rb` of your Rails application. For example, this will allow GET, POST or OPTIONS requests from any origin on any resource.
 
 ```ruby
@@ -80,6 +53,35 @@ Refer to [rails 3 example](https://github.com/cyu/rack-cors/tree/master/examples
 
 See The [Rails Guide to Rack](http://guides.rubyonrails.org/rails_on_rack.html) for more details on rack middlewares or watch the [railscast](http://railscasts.com/episodes/151-rack-middleware).
 
+### Rack Configuration
+
+NOTE: If you're running Rails, updating in `config/application.rb` should be enough.  There is no need to update `config.ru` as well.
+
+In `config.ru`, configure `Rack::Cors` by passing a block to the `use` command:
+
+```ruby
+use Rack::Cors do
+  allow do
+    origins 'localhost:3000', '127.0.0.1:3000',
+            /\Ahttp:\/\/192\.168\.0\.\d{1,3}(:\d+)?\z/
+            # regular expressions can be used here
+
+    resource '/file/list_all/', :headers => 'x-domain-token'
+    resource '/file/at/*',
+        :methods => [:get, :post, :delete, :put, :patch, :options, :head],
+        :headers => 'x-domain-token',
+        :expose  => ['Some-Custom-Response-Header'],
+        :max_age => 600
+        # headers to expose
+  end
+
+  allow do
+    origins '*'
+    resource '/public/*', :headers => :any, :methods => :get
+  end
+end
+```
+
 ### Configuration Reference
 
 #### Middleware Options
@@ -96,8 +98,7 @@ Additionally, origins can be specified dynamically via a block of the following 
   origins { |source, env| true || false }
 ```
 
-#### Resource
-A Resource path can be specified as exact string match (`/path/to/file.txt`) or with a '\*' wildcard (`/all/files/in/*`).  A resource can take the following options:
+A Resource path can be specified as exact string match (`/path/to/file.txt`) or with a '\*' wildcard (`/all/files/in/*`).  To include all of a directory's files and the files in its subdirectories, use this form: `/assets/**/*`.  A resource can take the following options:
 
 * **methods** (string or array or `:any`): The HTTP methods allowed for the resource.
 * **headers** (string or array or `:any`): The HTTP headers that will be allowed in the CORS resource request.  Use `:any` to allow for any headers in the actual request.

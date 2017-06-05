@@ -64,6 +64,12 @@ describe Rack::Cors do
     cors_request '/proc-origin', :origin => 'http://10.10.10.10:3000'
   end
 
+  it 'should not mix up path rules across origins' do
+    header 'Origin', 'http://10.10.10.10:3000'
+    get '/' # / is configured in a separate rule block
+    should_render_cors_failure
+  end
+
   it 'should support alternative X-Origin header' do
     header 'X-Origin', 'http://localhost:3000'
     get '/'
@@ -248,12 +254,6 @@ describe Rack::Cors do
       preflight_request('http://locohost:3000', '/public_without_credentials')
       should_render_cors_success
       last_response.headers['Access-Control-Allow-Origin'].must_equal '*'
-    end
-
-    it 'should "null" origin, allowed as "file://", returned as "null" in header' do
-      preflight_request('null', '/')
-      should_render_cors_success
-      last_response.headers['Access-Control-Allow-Origin'].must_equal 'null'
     end
 
     it 'should return "file://" as header with "file://" as origin' do

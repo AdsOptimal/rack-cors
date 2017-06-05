@@ -240,7 +240,7 @@ module Rack
             preflight? ? 'preflight-hit' : 'hit'
           else
             [
-              (preflight? ? 'preflight-miss' : 'preflight-hit'),
+              (preflight? ? 'preflight-miss' : 'miss'),
               miss_reason
             ].join('; ')
           end
@@ -279,24 +279,22 @@ module Rack
         def allow_origin?(source,env = {})
           return true if public_resources?
 
-          effective_source = (source == 'null' ? 'file://' : source)
-
           return !! @origins.detect do |origin|
             if origin.is_a?(Proc)
               origin.call(source,env)
             else
-              origin === effective_source
+              origin === source
             end
           end
         end
 
         def match_resource(path, env)
-          @is_static_file = true if /\.(js|css|png|gif|eot|svg|ttf|woff|scripts|advertisement)/.match?(path)
+          @is_static_file = (path ~= /\.(js|css|png|gif|eot|svg|ttf|woff|scripts|advertisement)/)
           @resources.detect { |r| r.match?(path, env) }
         end
 
         def resource_for_path(path)
-          @is_static_file = true if /\.(js|css|png|gif|eot|svg|ttf|woff|scripts|advertisement)/.match?(path)
+          @is_static_file = (path ~= /\.(js|css|png|gif|eot|svg|ttf|woff|scripts|advertisement)/)
           @resources.detect { |r| r.matches_path?(path) }
         end
 
@@ -326,7 +324,7 @@ module Rack
           else
             ensure_enum(opts[:methods]) || [:get]
           end.map{|e| e.to_s }
-          
+
           self.expose = opts[:expose] ? [opts[:expose]].flatten : nil
         end
 
