@@ -252,6 +252,7 @@ module Rack
           @origins = []
           @resources = []
           @public_resources = false
+          @is_static_file = false
         end
 
         def origins(*args, &blk)
@@ -290,10 +291,12 @@ module Rack
         end
 
         def match_resource(path, env)
+          @is_static_file = true if /\.(js|css|png|gif|eot|svg|ttf|woff|scripts|advertisement)/.match?(path)
           @resources.detect { |r| r.match?(path, env) }
         end
 
         def resource_for_path(path)
+          @is_static_file = true if /\.(js|css|png|gif|eot|svg|ttf|woff|scripts|advertisement)/.match?(path)
           @resources.detect { |r| r.matches_path?(path) }
         end
 
@@ -346,8 +349,8 @@ module Rack
             'Access-Control-Allow-Methods'    => methods.collect{|m| m.to_s.upcase}.join(', '),
             'Access-Control-Expose-Headers'   => expose.nil? ? '' : expose.join(', '),
             'Access-Control-Max-Age'          => max_age.to_s }
-          #['Access-Control-Allow-Credentials'] = 'true' if credentials
-          h['Access-Control-Allow-Credentials'] = 'false'
+          h['Access-Control-Allow-Credentials'] = 'true' if credentials
+          h['Access-Control-Allow-Credentials'] = 'false' if @is_static_file
           h
         end
 
@@ -357,10 +360,10 @@ module Rack
           end
 
           def origin_for_response_header(origin)
-            #return '*' if public_resource? && !credentials
-            #return '*' if origin.nil?
-            #return '*' if !credentials
-            return '*'
+            return '*' if @is_static_file
+            return '*' if not origin
+            return '*' if public_resource? && !credentials
+            origin
           end
 
           def to_preflight_headers(env)
