@@ -289,11 +289,13 @@ module Rack
         end
 
         def match_resource(path, env)
+          puts "match_resource: #{path}"
           @is_static_file = (path =~ /\.(js|css|png|gif|eot|svg|ttf|woff|scripts|advertisement|assets|mobilemonetizer)/)
           @resources.detect { |r| r.match?(path, env) }
         end
 
         def resource_for_path(path)
+          puts "resource_for_path: #{path}"
           @is_static_file = (path =~ /\.(js|css|png|gif|eot|svg|ttf|woff|scripts|advertisement|assets|mobilemonetizer)/)
           @resources.detect { |r| r.matches_path?(path) }
         end
