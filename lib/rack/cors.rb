@@ -350,7 +350,7 @@ module Rack
             'Access-Control-Expose-Headers'   => expose.nil? ? '' : expose.join(', '),
             'Access-Control-Max-Age'          => max_age.to_s }
           h['Access-Control-Allow-Credentials'] = 'true' if credentials
-          h['Access-Control-Allow-Credentials'] = 'false' if @is_static_file
+          h['Access-Control-Allow-Credentials'] = 'false' if public_resource?
           h
         end
 
@@ -360,9 +360,9 @@ module Rack
           end
 
           def origin_for_response_header(origin)
-            return '*' if @is_static_file
+            return '*' if public_resource?
             return '*' if not origin
-            return '*' if public_resource? && !credentials
+            return '*' if !credentials
             origin
           end
 
